@@ -1,0 +1,218 @@
+\documentclass[border=8pt, multi, tikz]{standalone}
+\usepackage{import}
+\subimport{layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d}
+\usetikzlibrary{calc}
+
+% Define colors
+\definecolor{backboneblue}{RGB}{173,216,230}
+\definecolor{backbonepink}{RGB}{255,182,193}
+\def\BackboneColor{backboneblue}
+\def\BackboneBandColor{backbonepink}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\SoftmaxColor{rgb:blue,4;green,3;black,3}
+\def\edgecolor{rgb:blue,4;red,1;green,4;black,3}
+
+% Define Box style for 3D blocks
+\tikzset{
+    Box/.pic={
+        \tikzset{/boxblock/.cd,#1}
+        \tikzstyle{box}=[every edge/.append style={pic actions, densely dashed, opacity=.7},fill opacity=\opacity, pic actions,fill=\fill]
+        
+        \pgfmathsetmacro{\y}{\cubey*\scale}
+        \pgfmathsetmacro{\z}{\cubez*\scale}
+        \pgfmathsetmacro{\x}{\cubex*\scale}
+        
+        \coordinate (a) at (0, \y/2, \z/2);
+        \coordinate (b) at (0, -\y/2, \z/2);
+        \coordinate (c) at (\x, -\y/2, \z/2);
+        \coordinate (d) at (\x, \y/2, \z/2);
+        \coordinate (e) at (\x, \y/2, -\z/2);
+        \coordinate (f) at (\x, -\y/2, -\z/2);
+        \coordinate (g) at (0, -\y/2, -\z/2);
+        \coordinate (h) at (0, \y/2, -\z/2);
+        
+        \draw [box] 
+            (d) -- (a) -- (b) -- (c) -- cycle
+            (d) -- (a) -- (h) -- (e) -- cycle
+            (f) edge (g)
+            (b) edge (g)
+            (h) edge (g)
+            (d) -- (e) -- (f) -- (c) -- cycle;
+        
+        \path (b) edge ["\Large\xlabel"',midway,font=\small] (c);
+        
+        \tikzstyle{captionlabel}=[text width=15*\x/\scale,text centered,font=\small]       
+        \path (\x/2,-\y/2,+\z/2) + (0,-25pt) coordinate (cap) 
+        edge ["\textcolor{black}{\bf \caption}"',captionlabel](cap);
+        
+        \coordinate (\name-west) at (0,0,0);
+        \coordinate (\name-east) at (\x,0,0);
+        \coordinate (\name-anchor) at (\x/2,0,0);
+    },
+    /boxblock/.search also={/tikz},
+    /boxblock/.cd,
+    width/.store in=\cubex,
+    height/.store in=\cubey,
+    depth/.store in=\cubez,
+    scale/.store in=\scale,
+    xlabel/.store in=\xlabel,
+    caption/.store in=\caption,
+    name/.store in=\name,
+    fill/.store in=\fill,
+    opacity/.store in=\opacity,
+    fill={rgb:red,5;green,5;blue,5;white,15},
+    opacity=0.4,
+    width=2,
+    height=13,
+    depth=15,
+    scale=.15,
+    xlabel=,
+    caption=,
+    name=,
+}
+
+% Define RightBandedBox for backbone
+\tikzset{
+    RightBandedBox/.pic={
+        \tikzset{/block/.cd,#1}
+        \tikzstyle{box}=[every edge/.append style={pic actions, densely dashed, opacity=.7},fill opacity=\opacity, pic actions,fill=\fill]
+        \tikzstyle{band}=[every edge/.append style={pic actions, densely dashed, opacity=.7},fill opacity=\bandopacity, pic actions,fill=\bandfill,draw=\bandfill]
+        
+        \pgfmathsetmacro{\y}{\cubey*\scale}
+        \pgfmathsetmacro{\z}{\cubez*\scale}
+        \pgfmathsetmacro{\x}{\cubex*\scale}
+        
+        \coordinate (a) at (0, \y/2, \z/2);
+        \coordinate (art) at (\x/3, \y/2, \z/2);
+        \coordinate (b) at (0, -\y/2, \z/2);
+        \coordinate (brt) at (\x/3, -\y/2, \z/2);
+        \coordinate (c) at (\x, -\y/2, \z/2);
+        \coordinate (d) at (\x, \y/2, \z/2);
+        \coordinate (e) at (\x, \y/2, -\z/2);
+        \coordinate (f) at (\x, -\y/2, -\z/2);
+        \coordinate (g) at (0, -\y/2, -\z/2);
+        \coordinate (h) at (0, \y/2, -\z/2);
+        \coordinate (hrt) at (\x/3, \y/2, -\z/2);
+        
+        \draw [box] 
+            (d) -- (a) -- (b) -- (c) -- cycle
+            (d) -- (a) -- (h) -- (e) -- cycle
+            (f) edge (g)
+            (b) edge (g)
+            (h) edge (g);
+        \draw [band] 
+            (d) -- (art) -- (brt) -- (c) -- cycle
+            (d) -- (art) -- (hrt) -- (e) -- cycle;
+        \draw [box,fill opacity=0] 
+            (d) -- (a) -- (b) -- (c) -- cycle
+            (d) -- (a) -- (h) -- (e) -- cycle;
+        \draw [box] (d) -- (e) -- (f) -- (c) -- cycle;
+        \draw [band] (d) -- (e) -- (f) -- (c) -- cycle;
+        
+        \tikzstyle{captionlabel}=[text width=15*\x/\scale,text centered,font=\small]       
+        \path (\x/2,-\y/2,+\z/2) + (0,-25pt) coordinate (cap) 
+        edge ["\textcolor{black}{\bf \caption}"',captionlabel](cap);
+        
+        \coordinate (\name-west) at (0,0,0);
+        \coordinate (\name-east) at (\x,0,0);
+        \coordinate (\name-anchor) at (\x/2,0,0);
+    },
+    /block/.search also={/tikz},
+    /block/.cd,
+    width/.store in=\cubex,
+    height/.store in=\cubey,
+    depth/.store in=\cubez,
+    scale/.store in=\scale,
+    caption/.store in=\caption,
+    name/.store in=\name,
+    fill/.store in=\fill,
+    bandfill/.store in=\bandfill,
+    opacity/.store in=\opacity,
+    bandopacity/.store in=\bandopacity,
+    fill={rgb:red,5;green,5;blue,5;white,15},
+    bandfill={rgb:red,5;green,5;blue,5;white,5},
+    opacity=0.4,
+    bandopacity=0.6,
+    width=2,
+    height=13,
+    depth=15,
+    scale=.15,
+    caption=,
+    name=,
+}
+
+\begin{document}
+\begin{tikzpicture}[scale=0.65, transform shape]
+\tikzstyle{connection}=[thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7]
+
+% Adjusted bounding box: more bottom space for captions, less right space
+\useasboundingbox (-2.5,-4.5) rectangle (9.5,2.5);
+
+% Input text
+\node[font=\footnotesize, align=center] (input_text) at (-1.8,0) {\texttt{[CLS]} Premise\\\texttt{[SEP]} Hypothesis\\\texttt{[SEP]}};
+
+% Backbone (abstracted)
+\pic[shift={(0,0,0)}] at (0.5,0,0) 
+    {RightBandedBox={
+        name=backbone,
+        caption=ELECTRA-small\\Backbone\\(12 Layers),
+        fill=\BackboneColor,
+        bandfill=\BackboneBandColor,
+        height=18,
+        width=10,
+        depth=18
+    }
+};
+
+% CLS extraction
+\pic[shift={(2,0,0)}] at (backbone-east) 
+    {Box={
+        name=cls,
+        caption=\texttt{[CLS]} Token\\(256-dim),
+        fill=\SoftmaxColor,
+        opacity=0.8,
+        height=7,
+        width=2.5,
+        depth=7,
+        xlabel=
+    }
+};
+
+% Classification head
+\pic[shift={(1.8,0,0)}] at (cls-east) 
+    {Box={
+        name=classifier,
+        caption=Classification\\Head\\256$\rightarrow$3,
+        fill=\FcColor,
+        height=6,
+        width=3.5,
+        depth=6,
+        xlabel=
+    }
+};
+
+% Output
+\pic[shift={(1.5,0,0)}] at (classifier-east) 
+    {Box={
+        name=output,
+        caption=Output\\E/N/C,
+        fill=\SoftmaxColor,
+        opacity=0.8,
+        height=5,
+        width=3,
+        depth=5,
+        xlabel=
+    }
+};
+
+% Connections
+\draw [connection] (input_text.east) -- node[sloped,pos=0.9] {\midarrow} (backbone-west);
+\draw [connection] (backbone-east) -- node[sloped,pos=0.9] {\midarrow} (cls-west);
+\draw [connection] (cls-east) -- node[sloped,pos=0.9] {\midarrow} (classifier-west);
+\draw [connection] (classifier-east) -- node[sloped,pos=0.9] {\midarrow} (output-west);
+
+\end{tikzpicture}
+\end{document}
+

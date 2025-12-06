@@ -38,6 +38,7 @@ def to_begin():
 def to_input( pathfile, to='(-3,0,0)', width=8, height=8, name="temp" ):
     return r"""
 \node[canvas is zy plane at x=0] (""" + name + """) at """+ to +""" {\includegraphics[width="""+ str(width)+"cm"+""",height="""+ str(height)+"cm"+"""]{"""+ pathfile +"""}};
+\coordinate (""" + name + """-east) at (""" + name + """.east);
 """
 
 # Conv
@@ -50,6 +51,24 @@ def to_Conv( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", widt
         xlabel={{"""+ str(n_filer) +""", }},
         zlabel="""+ str(s_filer) +""",
         fill=\ConvColor,
+        height="""+ str(height) +""",
+        width="""+ str(width) +""",
+        depth="""+ str(depth) +"""
+        }
+    };
+"""
+
+# Conv with ReLU
+def to_ConvRelu( name, s_filer=256, n_filer=64, offset="(0,0,0)", to="(0,0,0)", width=1, height=40, depth=40, caption=" " ):
+    return r"""
+\pic[shift={"""+ offset +"""}] at """+ to +""" 
+    {RightBandedBox={
+        name=""" + name +""",
+        caption="""+ caption +r""",
+        xlabel={{"""+ str(n_filer) +""", }},
+        zlabel="""+ str(s_filer) +""",
+        fill=\ConvColor,
+        bandfill=\ConvReluColor,
         height="""+ str(height) +""",
         width="""+ str(width) +""",
         depth="""+ str(depth) +"""
@@ -181,7 +200,12 @@ def to_Sum( name, offset="(0,0,0)", to="(0,0,0)", radius=2.5, opacity=0.6):
 
 def to_connection( of, to):
     return r"""
-\draw [connection]  ("""+of+"""-east)    -- node {\midarrow} ("""+to+"""-west);
+\draw [connection]  ("""+of+"""-east)    -- node[sloped,pos=0.9] {\midarrow} ("""+to+"""-west);
+"""
+
+def to_connection_with_arrow( of, to):
+    return r"""
+\draw [connection, -Stealth]  ("""+of+"""-east)    -- node[sloped,pos=0.9] {\midarrow} ("""+to+"""-west);
 """
 
 def to_skip( of, to, pos=1.25):

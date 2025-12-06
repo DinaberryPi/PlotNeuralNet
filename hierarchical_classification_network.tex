@@ -1,0 +1,265 @@
+\documentclass[border=8pt, multi, tikz]{standalone}
+\usepackage{import}
+\subimport{layers/}{init}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d}
+\usetikzlibrary{calc}
+
+% Define colors from the color palette
+\definecolor{lightteal}{RGB}{142,207,201}        % #8ECFC9 - Light Teal/Aqua
+\definecolor{lightorange}{RGB}{255,190,122}     % #FFBE7A - Light Orange/Peach
+\definecolor{coral}{RGB}{250,127,111}            % #FA7F6F - Coral/Light Red
+\definecolor{mutedblue}{RGB}{130,176,210}       % #82B0D2 - Muted Blue/Periwinkle
+\definecolor{lightlavender}{RGB}{190,184,220}    % #BEB8DC - Light Lavender/Pale Purple
+\definecolor{lightbeige}{RGB}{231,218,210}      % #E7DAD2 - Very Light Beige/Off-white
+\definecolor{mediumgray}{RGB}{153,153,153}      % #999999 - Medium Gray
+
+% Backbone colors
+\def\ConvColor{mutedblue}
+\def\ConvReluColor{lightteal}
+% GAP color
+\def\PoolColor{coral}
+% Feature vector color
+\def\FeatureColor{lightteal}
+% MLP colors for each taxonomic rank
+\def\ClassMLPColor{lightorange}
+\def\OrderMLPColor{mutedblue}
+\def\FamilyMLPColor{lightlavender}
+\def\GenusMLPColor{lightteal}
+\def\SpeciesMLPColor{coral}
+% Probability output colors (slightly darker variants)
+\def\ClassProbColor{lightorange}
+\def\OrderProbColor{mutedblue}
+\def\FamilyProbColor{lightlavender}
+\def\GenusProbColor{lightteal}
+\def\SpeciesProbColor{coral}
+\def\edgecolor{rgb:blue,4;red,1;green,4;black,3}
+
+% Arrow colors - using palette colors
+\def\ClassArrowColor{lightorange}
+\def\OrderArrowColor{mutedblue}
+\def\FamilyArrowColor{lightlavender}
+\def\GenusArrowColor{lightteal}
+\def\SpeciesArrowColor{coral}
+
+\begin{document}
+\begin{tikzpicture}[scale=0.85, transform shape]
+\tikzstyle{connection}=[thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7,line width=0.5mm,-Stealth]
+
+% Bounding box - adjusted to show full input, reduce right space, and trim top/bottom
+% Reduced bottom margin to cut excess white space
+\useasboundingbox (-8.5,-16.5) rectangle (23,10);
+
+% Input Image - moved closer to backbone
+\node[canvas is zy plane at x=0] (input) at (-7.5,0,0) {\includegraphics[width=5cm,height=5cm]{pycore/diatom.png}};
+\coordinate (input-east) at ($(input) + (2.5,0,0)$);
+
+% EfficientNet-B0 Backbone (with banded structure)
+\pic[shift={ (0,0,0) }] at (-4,0,0) 
+    {RightBandedBox={
+        name=backbone,
+        caption=EfficientNet-B0\\Backbone,
+        fill=\ConvColor,
+        bandfill=\ConvReluColor,
+        height=28,
+        width=14,
+        depth=28
+        }
+    };
+
+% GAP (Global Average Pooling)
+\pic[shift={ (1.5,0,0) }] at (backbone-east) 
+    {Box={
+        name=gap,
+        caption=GAP,
+        fill=\PoolColor,
+        opacity=0.6,
+        height=7,
+        width=2,
+        depth=7
+        }
+    };
+
+% Feature Vector (1280-dim)
+\pic[shift={(2.5,0,0)}] at (gap-east) 
+    {Box={
+        name=features,
+        caption=Feature Vector\\(1280-dim),
+        fill=\FeatureColor,
+        opacity=0.8,
+        height=8,
+        width=4,
+        depth=18
+        }
+    };
+
+% Connections from input to backbone to gap to features
+% Arrow from input to backbone - longer tail
+\coordinate (input-arrow-start) at ($(input) + (1,0,0)$);
+\draw [connection]  (input-arrow-start) -- (backbone-west);
+\draw [connection]  (backbone-east)  -- (gap-west);
+\draw [connection]  (gap-east)      -- (features-west);
+
+% ========== Class Head ==========
+\pic[shift={(7,9,0)}] at (features-east) 
+    {Box={
+        name=class_mlp,
+        caption=Class~MLP\\1280$\rightarrow$512$\rightarrow$3,
+        fill=\ClassMLPColor,
+        opacity=0.6,
+        height=5,
+        width={8, 6.4},
+        depth=5,
+        xlabel={{512, 3}}
+        }
+    };
+
+\pic[shift={(-3.5,0,0)}] at ($(class_mlp-east) + (10,0,0)$) 
+    {Box={
+        name=class_out,
+        caption=Class~Probabilities~(3),
+        fill=\ClassProbColor,
+        opacity=0.8,
+        height=3,
+        width=3.5,
+        depth=3
+        }
+    };
+
+% Class connections (brown/orange)
+\draw [connection, draw=\ClassArrowColor]  (features-east)    -- (class_mlp-west);
+\draw [connection, draw=\ClassArrowColor]  (class_mlp-east)    -- (class_out-west);
+
+% ========== Order Head ==========
+\pic[shift={(7,5.5,0)}] at (features-east) 
+    {Box={
+        name=order_mlp,
+        caption=Order~MLP\\1283$\rightarrow$512$\rightarrow$256$\rightarrow$2,
+        fill=\OrderMLPColor,
+        opacity=0.6,
+        height=5,
+        width={8, 6.4, 5},
+        depth=5,
+        xlabel={{512, 256, 2}}
+        }
+    };
+
+\pic[shift={(-3.5,-3.5,0)}] at ($(class_mlp-east) + (10,0,0)$) 
+    {Box={
+        name=order_out,
+        caption=Order~Probabilities~(2),
+        fill=\OrderProbColor,
+        opacity=0.8,
+        height=3.5,
+        width=3.5,
+        depth=3.5
+        }
+    };
+
+% Order connections (blue)
+\draw [connection, draw=\OrderArrowColor]  (features-east)    -- (order_mlp-west);
+\draw [connection, draw=\ClassArrowColor]  (class_out-east)    -- (order_mlp-west);
+\draw [connection, draw=\OrderArrowColor]  (order_mlp-east)    -- (order_out-west);
+
+% ========== Family Head ==========
+\pic[shift={(7,2,0)}] at (features-east) 
+    {Box={
+        name=family_mlp,
+        caption=Family~MLP\\1285$\rightarrow$512$\rightarrow$256$\rightarrow$3,
+        fill=\FamilyMLPColor,
+        opacity=0.6,
+        height=5,
+        width={8, 6.4, 5},
+        depth=5,
+        xlabel={{512, 256, 3}}
+        }
+    };
+
+\pic[shift={(-3.5,-7,0)}] at ($(class_mlp-east) + (10,0,0)$) 
+    {Box={
+        name=family_out,
+        caption=Family~Probabilities~(3),
+        fill=\FamilyProbColor,
+        opacity=0.8,
+        height=3.5,
+        width=3.5,
+        depth=3.5
+        }
+    };
+
+% Family connections (purple/pink)
+\draw [connection, draw=\FamilyArrowColor]  (features-east)    -- (family_mlp-west);
+\draw [connection, draw=\ClassArrowColor]  (class_out-east)    -- (family_mlp-west);
+\draw [connection, draw=\OrderArrowColor]  (order_out-east)    -- (family_mlp-west);
+\draw [connection, draw=\FamilyArrowColor]  (family_mlp-east)    -- (family_out-west);
+
+% ========== Genus Head ==========
+\pic[shift={(7,-3,0)}] at (features-east) 
+    {Box={
+        name=genus_mlp,
+        caption=Genus~MLP\\1288$\rightarrow$1024$\rightarrow$512$\rightarrow$256$\rightarrow$24,
+        fill=\GenusMLPColor,
+        opacity=0.6,
+        height=5.5,
+        width={8.4, 6.4, 5, 4},
+        depth=5.5,
+        xlabel={{1024, 512, 256, 24}}
+        }
+    };
+
+\pic[shift={(-3.5,-12,0)}] at ($(class_mlp-east) + (10,0,0)$) 
+    {Box={
+        name=genus_out,
+        caption=Genus~Probabilities~(24),
+        fill=\GenusProbColor,
+        opacity=0.8,
+        height=3.5,
+        width=3.5,
+        depth=3.5
+        }
+    };
+
+% Genus connections (green)
+\draw [connection, draw=\GenusArrowColor]  (features-east)    -- (genus_mlp-west);
+\draw [connection, draw=\ClassArrowColor]  (class_out-east)    -- (genus_mlp-west);
+\draw [connection, draw=\OrderArrowColor]  (order_out-east)    -- (genus_mlp-west);
+\draw [connection, draw=\FamilyArrowColor]  (family_out-east)    -- (genus_mlp-west);
+\draw [connection, draw=\GenusArrowColor]  (genus_mlp-east)    -- (genus_out-west);
+
+% ========== Species Head ==========
+\pic[shift={(7,-7.5,0)}] at (features-east) 
+    {Box={
+        name=species_mlp,
+        caption=Species~MLP\\1312$\rightarrow$1024$\rightarrow$512$\rightarrow$256$\rightarrow$82,
+        fill=\SpeciesMLPColor,
+        opacity=0.6,
+        height=5.5,
+        width={8.4, 6.4, 5, 4},
+        depth=5.5,
+        xlabel={{1024, 512, 256, 82}}
+        }
+    };
+
+\pic[shift={(-3.5,-16.5,0)}] at ($(class_mlp-east) + (10,0,0)$) 
+    {Box={
+        name=species_out,
+        caption=Species~Probabilities~(82),
+        fill=\SpeciesProbColor,
+        opacity=0.8,
+        height=4,
+        width=3.5,
+        depth=4
+        }
+    };
+
+% Species connections (dark purple)
+\draw [connection, draw=\SpeciesArrowColor]  (features-east)    -- (species_mlp-west);
+\draw [connection, draw=\ClassArrowColor]  (class_out-east)    -- (species_mlp-west);
+\draw [connection, draw=\OrderArrowColor]  (order_out-east)    -- (species_mlp-west);
+\draw [connection, draw=\FamilyArrowColor]  (family_out-east)    -- (species_mlp-west);
+\draw [connection, draw=\GenusArrowColor]  (genus_out-east)    -- (species_mlp-west);
+\draw [connection, draw=\SpeciesArrowColor]  (species_mlp-east)    -- (species_out-west);
+
+\end{tikzpicture}
+\end{document}
+

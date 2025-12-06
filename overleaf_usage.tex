@@ -1,0 +1,36 @@
+% 在 Overleaf 中使用双栏图片的示例代码
+
+% 方式1: 使用 figure* 环境（跨双栏，占满整个页面宽度）
+% 适用于图片宽度为双栏宽度的情况
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{electra_arch.png}
+    \caption{ELECTRA-small architecture for NLI. The model processes the concatenated premise and hypothesis through the ELECTRA-small backbone (12 transformer layers), extracts the \texttt{[CLS]} token representation, and applies a classification head to produce the final prediction.}
+    \label{fig:electra_arch}
+\end{figure*}
+
+% 方式2: 如果使用 figure 环境（单栏），图片会自动缩放
+% 适用于图片放在单栏中的情况
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{electra_arch.png}
+    \caption{ELECTRA-small architecture for NLI.}
+    \label{fig:electra_arch}
+\end{figure}
+
+% 方式3: 精确控制宽度（推荐用于双栏图片）
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.95\textwidth]{electra_arch.png}
+    \caption{ELECTRA-small architecture for NLI. The model processes the concatenated premise and hypothesis through the ELECTRA-small backbone (12 transformer layers), extracts the \texttt{[CLS]} token representation, and applies a classification head to produce the final prediction.}
+    \label{fig:electra_arch}
+\end{figure*}
+
+% 方式4: 使用 scale 参数（保持原始比例）
+\begin{figure*}[t]
+    \centering
+    \includegraphics[scale=0.8]{electra_arch.png}
+    \caption{ELECTRA-small architecture for NLI.}
+    \label{fig:electra_arch}
+\end{figure*}
+

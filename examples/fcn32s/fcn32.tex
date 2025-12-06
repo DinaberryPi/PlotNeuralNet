@@ -79,10 +79,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Draw connections
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\draw [connection]  (cr1-east)   -- node {\midarrow} (p1-west);
 \draw [connection]  (p1-east)    -- node {\midarrow} (cr2-west);
+\draw [connection]  (cr2-east)   -- node {\midarrow} (p2-west);
 \draw [connection]  (p2-east)    -- node {\midarrow} (cr3-west);
+\draw [connection]  (cr3-east)   -- node {\midarrow} (p3-west);
 \draw [connection]  (p3-east)    -- node {\midarrow} (cr4-west);
+\draw [connection]  (cr4-east)   -- node {\midarrow} (p4-west);
 \draw [connection]  (p4-east)    -- node {\midarrow} (cr5-west);
+\draw [connection]  (cr5-east)   -- node {\midarrow} (p5-west);
 \draw [connection]  (p5-east)    -- node {\midarrow} (cr6_7-west);
 \draw [connection]  (cr6_7-east) -- node {\midarrow} (c8-west);
 \draw [connection]  (c8-east)    -- node {\midarrow} (d32-west);

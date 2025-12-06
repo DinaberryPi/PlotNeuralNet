@@ -1,0 +1,54 @@
+% 修复 \input 错误的示例
+
+% ============================================
+% 错误示例（不要这样做）
+% ============================================
+% \input{latex/input/model_architecture.tex}  % 可能出错的原因：
+% 1. 文件路径不存在
+% 2. 路径大小写不匹配
+% 3. 文件未上传到 Overleaf
+
+% ============================================
+% 正确示例 1: 如果文件在 latex/input/ 目录
+% ============================================
+% 确保文件结构：
+% your-project/
+% ├── main.tex
+% └── latex/
+%     └── input/
+%         └── model_architecture.tex
+
+\input{latex/input/model_architecture}  % 注意：不需要 .tex 扩展名
+
+% ============================================
+% 正确示例 2: 如果文件在项目根目录
+% ============================================
+% \input{model_architecture}
+
+% ============================================
+% 正确示例 3: 使用 import 包（更灵活）
+% ============================================
+% \usepackage{import}
+% \subimport{latex/input/}{model_architecture}
+
+% ============================================
+% 完整示例：在 Overleaf 中使用
+% ============================================
+\documentclass[twocolumn]{article}
+\usepackage{graphicx}
+
+\begin{document}
+
+\section{Model Architecture}
+
+% 方法 1: 直接输入（如果文件在 latex/input/）
+\input{latex/input/model_architecture}
+
+% 方法 2: 如果文件在根目录
+% \input{model_architecture}
+
+% 方法 3: 如果文件在同一目录
+% \input{model_architecture}
+
+\end{document}
+
