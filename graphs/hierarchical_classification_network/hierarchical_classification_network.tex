@@ -1,12 +1,12 @@
 \documentclass[border=8pt, multi, tikz]{standalone}
 \usepackage{import}
-\subimport{layers/}{init}
+\subimport{../../layers/}{init}
 \usetikzlibrary{positioning}
 \usetikzlibrary{3d}
 \usetikzlibrary{calc}
 
 % Define colors from the color palette
-\definecolor{lightteal}{RGB}{142,207,201}        % #8ECFC9 - Light Teal/Aqua
+\definecolor{lightteal}{RGB}{73,108,136}         % #496C88 - Muted Blue-Grey
 \definecolor{lightorange}{RGB}{255,190,122}     % #FFBE7A - Light Orange/Peach
 \definecolor{coral}{RGB}{250,127,111}            % #FA7F6F - Coral/Light Red
 \definecolor{mutedblue}{RGB}{130,176,210}       % #82B0D2 - Muted Blue/Periwinkle
@@ -51,7 +51,7 @@
 \useasboundingbox (-8.5,-16.5) rectangle (23,10);
 
 % Input Image - moved closer to backbone
-\node[canvas is zy plane at x=0] (input) at (-7.5,0,0) {\includegraphics[width=5cm,height=5cm]{pycore/diatom.png}};
+\node[canvas is zy plane at x=0] (input) at (-7.5,0,0) {\includegraphics[width=5cm,height=5cm]{diatom.png}};
 \coordinate (input-east) at ($(input) + (2.5,0,0)$);
 
 % EfficientNet-B0 Backbone (with banded structure)
